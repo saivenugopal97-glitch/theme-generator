@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Theme Generator</title>
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --bg-color: #ffffff;
+      --font-family: sans-serif;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background-color: var(--bg-color);
+      color: var(--primary-color);
+      transition: all 0.3s ease;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .controls label {
+      display: block;
+      margin: 1rem 0;
+    }
+
+    .buttons button {
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    .preview {
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 1px solid var(--primary-color);
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Theme Generator</h1>
+
+    <div class="controls">
+      <label>
+        Primary Color:
+        <input type="color" id="primaryColor" />
+      </label>
+      <label>
+        Background Color:
+        <input type="color" id="bgColor" />
+      </label>
+      <label>
+        Font Family:
+        <select id="fontSelect">
+          <option value="sans-serif">Sans-serif</option>
+          <option value="serif">Serif</option>
+          <option value="monospace">Monospace</option>
+          <option value="cursive">Cursive</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="buttons">
+      <button id="saveBtn">💾 Save Theme</button>
+      <button id="downloadBtn">⬇️ Download CSS</button>
+      <button id="resetBtn">🔄 Reset</button>
+    </div>
+
+    <div class="preview">
+      <h2>Live Preview</h2>
+      <p>This text will reflect your selected theme in real-time.</p>
+    </div>
+  </div>
+
+  <script>
+    const primaryColorInput = document.getElementById("primaryColor");
+    const bgColorInput = document.getElementById("bgColor");
+    const fontSelect = document.getElementById("fontSelect");
+
+    const saveBtn = document.getElementById("saveBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const setTheme = ({ primary, bg, font }) => {
+      document.documentElement.style.setProperty("--primary-color", primary);
+      document.documentElement.style.setProperty("--bg-color", bg);
+      document.documentElement.style.setProperty("--font-family", font);
+
+      primaryColorInput.value = primary;
+      bgColorInput.value = bg;
+      fontSelect.value = font;
+    };
+
+    const getTheme = () => {
+      return {
+        primary: getComputedStyle(document.documentElement).getPropertyValue("--primary-color").trim(),
+        bg: getComputedStyle(document.documentElement).getPropertyValue("--bg-color").trim(),
+        font: getComputedStyle(document.documentElement).getPropertyValue("--font-family").trim(),
+      };
+    };
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const storedTheme = JSON.parse(localStorage.getItem("theme"));
+      if (storedTheme) {
+        setTheme(storedTheme);
+      } else {
+        setTheme({ primary: "#3498db", bg: "#ffffff", font: "sans-serif" });
+      }
+    });
+
+    primaryColorInput.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--primary-color", primaryColorInput.value);
+    });
+
+    bgColorInput.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--bg-color", bgColorInput.value);
+    });
+
+    fontSelect.addEventListener("change", () => {
+      document.documentElement.style.setProperty("--font-family", fontSelect.value);
+    });
+
+    saveBtn.addEventListener("click", () => {
+      const theme = getTheme();
+      localStorage.setItem("theme", JSON.stringify(theme));
+      alert("Theme saved!");
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const theme = getTheme();
+      const cssContent = `:root {
+  --primary-color: ${theme.primary};
+  --bg-color: ${theme.bg};
+  --font-family: ${theme.font};
+}`;
+      const blob = new Blob([cssContent], { type: "text/css" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "theme.css";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    resetBtn.addEventListener("click", () => {
+      localStorage.removeItem("theme");
+      setTheme({ primary: "#3498db", bg: "#ffffff", font: "sans-serif" });
+    });
+  </script>
+</body>
+</html>
